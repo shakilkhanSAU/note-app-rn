@@ -8,6 +8,7 @@ import Edit from './src/screens/edit';
 import { useFonts } from 'expo-font';
 import Text from './src/component/text/text';
 import { initializeApp } from "firebase/app";
+import { getAuth } from 'firebase/auth';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,6 +23,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+export const auth = getAuth()
 
 
 // customize theme color
@@ -32,7 +34,6 @@ const myTheme = {
         background: '#fff'
     },
 }
-
 
 
 export default function App() {
