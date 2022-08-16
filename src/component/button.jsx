@@ -3,6 +3,7 @@ import React from 'react'
 import Text from './text/text'
 
 export default function Button({ title, onPress }) {
+
     return (
         <TouchableOpacity
             onPress={onPress}
@@ -15,10 +16,10 @@ export default function Button({ title, onPress }) {
 const styles = StyleSheet.create({
     primaryBtn: {
         padding: 12,
-        backgroundColor: '#F50057',
+        backgroundColor: '#F9AF37',
         alignItems: 'center',
         alignSelf: 'center',
         width: '50%',
-        borderRadius: 8,
+        borderRadius: 22,
     },
 })

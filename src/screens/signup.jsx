@@ -1,12 +1,14 @@
-import { View, StatusBar, StyleSheet, Image, ScrollView, SafeAreaView, TextInput, TouchableOpacity, Pressable } from 'react-native'
+import { View, StatusBar, StyleSheet, Image, ScrollView, SafeAreaView, TextInput, TouchableOpacity, Pressable, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import Text from '../component/text/text';
 import Button from '../component/button';
 import Input from '../component/input';
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { collection, addDoc, getFirestore } from "firebase/firestore";
+import { showMessage } from "react-native-flash-message";
 
-export default function Signup() {
+
+export default function Signup({ navigation }) {
     const [gender, setGender] = useState(null)
     const genderOptions = ['Male', 'Female'];
     const [email, setEmail] = useState('')
@@ -14,6 +16,7 @@ export default function Signup() {
     const [name, setName] = useState('')
     const [password, setPassword] = useState('')
     const [user, setUser] = useState();
+    const [loading, setLoading] = useState(false)
 
     // email password authentication
     const auth = getAuth();
@@ -21,6 +24,7 @@ export default function Signup() {
     // handle sign up function
     const handleSignup = async () => {
         try {
+            setLoading(true)
             // 1. create user with email and password
             const result = await createUserWithEmailAndPassword(auth, email, password)
             console.log('result----------------- >', result)
@@ -31,15 +35,26 @@ export default function Signup() {
                 age: age,
                 email: email,
                 gender: gender,
-                uid: result.uid
+                uid: result.user.uid
             });
-            console.log('data---------------------- >', result)
+            setLoading(false)
+            showMessage({
+                message: "Simple message",
+                type: "success",
+                description: "User created successfully!",
+            });
         }
         catch (error) {
-            console.log(`error message is ${error}`)
-        }
+            setLoading(false)
+            showMessage({
+                message: "Error",
+                type: "danger",
+                description: error.message,
+            });
 
+        }
         // 3. navigate the user to the home screen
+
     }
 
 
@@ -57,13 +72,12 @@ export default function Signup() {
                     <Input
                         placeholder='Your Name'
                         onChangeText={(text) => { setName(text) }}
+                        autoCapitalize={'words'}
                     />
                     <Input
                         placeholder='Your Email'
                         onChangeText={(text) => { setEmail(text) }}
-                    />
-                    <Input
-                        placeholder='Your Address'
+                        autoCapitalize={'none'}
                     />
                     <Input
                         placeholder='Your Age'
@@ -106,14 +120,18 @@ export default function Signup() {
                     justifyContent: 'flex-end',
                     marginTop: 20
                 }}>
-                    <Button
-                        title="Submit"
-                        onPress={handleSignup}
-                    />
+
+                    {
+                        loading ? <ActivityIndicator size='large'></ActivityIndicator> :
+                            <Button
+                                title="Submit"
+                                onPress={handleSignup}
+                            />
+                    }
                     <Pressable
                         style={styles.accountToggleer}
-                        onPress={() => { navigation.navigate("Signup") }}
-                    ><Text>Don't Have an Account? </Text><Text preset='h4' style={{ color: 'crimson' }}>  SignUp</Text></Pressable>
+                        onPress={() => { navigation.navigate("Signin") }}
+                    ><Text>Already Have an Account? </Text><Text preset='h4' style={{ color: 'crimson' }}>  Signin</Text></Pressable>
                 </View>
             </ScrollView>
         </SafeAreaView>

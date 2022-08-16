@@ -8,7 +8,11 @@ import Edit from './src/screens/edit';
 import { useFonts } from 'expo-font';
 import Text from './src/component/text/text';
 import { initializeApp } from "firebase/app";
-import { getAuth } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import FlashMessage from "react-native-flash-message";
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import { getFirestore } from 'firebase/firestore';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,9 +26,9 @@ const firebaseConfig = {
     appId: "1:47844027678:web:234bc2385720f7e835ed0f"
 };
 
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 export const auth = getAuth()
-
+export const db = getFirestore();
 
 // customize theme color
 const myTheme = {
@@ -37,7 +41,8 @@ const myTheme = {
 
 
 export default function App() {
-    const user = false;
+    const [user, setUser] = useState(null)
+    const [loading, setLoading] = useState(true)
 
     // custom font loader
     const [loaded] = useFonts({
@@ -46,6 +51,36 @@ export default function App() {
         nunitoBold: require('./assets/font/Nunito-Bold.ttf'),
         nunitoVariable: require('./assets/font/Nunito-VariableFont_wght.ttf')
     });
+
+    // dammy useeffect
+    // useEffect(() => {
+    //     signOut(auth)
+    // })
+
+    // user observer 
+    useEffect(() => {
+        const authSubscription = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setUser(user)
+                setLoading(false)
+            } else {
+                setUser(null)
+                setLoading(false)
+            }
+        })
+
+        return authSubscription;
+    }, [])
+
+    if (loading) {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <View>
+                    <ActivityIndicator size="large" />
+                </View>
+            </View>
+        )
+    }
 
     if (!loaded) {
         return <Text>loading font ...</Text>;
@@ -56,8 +91,12 @@ export default function App() {
                 {
                     user ?
                         <>
-                            <Stack.Screen name="Home" component={Home} />
-                            <Stack.Screen name="Create" component={Create} />
+                            <Stack.Screen name="Home">
+                                {(props) => <Home {...props} user={user} />}
+                            </Stack.Screen>
+                            <Stack.Screen name="Create">
+                                {(props) => <Create {...props} user={user} />}
+                            </Stack.Screen>
                             <Stack.Screen name="Edit" component={Edit} />
                         </>
                         :
@@ -67,6 +106,7 @@ export default function App() {
                         </>
                 }
             </Stack.Navigator>
+            <FlashMessage position="top" />
         </NavigationContainer>
     );
 }
