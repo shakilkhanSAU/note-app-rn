@@ -16,10 +16,10 @@ export default function Button({ title, onPress }) {
 const styles = StyleSheet.create({
     primaryBtn: {
         padding: 12,
-        backgroundColor: '#F9AF37',
+        backgroundColor: '#F50057',
         alignItems: 'center',
         alignSelf: 'center',
-        width: '50%',
+        width: '60%',
         borderRadius: 22,
     },
 })

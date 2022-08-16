@@ -35,10 +35,10 @@ export const presets = {
     },
     h3: {
         ...bold,
-        fontSize: 20
+        fontSize: 22
     },
     h4: {
         ...bold,
-        fontSize: 16
+        fontSize: 18
     },
 }

@@ -1,4 +1,4 @@
-import { View, StyleSheet, StatusBar, Platform } from 'react-native'
+import { View, StyleSheet, StatusBar, Platform, ActivityIndicator, Image } from 'react-native'
 import React, { useState } from 'react'
 import Input from '../component/input'
 import Text from '../component/text/text'
@@ -6,40 +6,62 @@ import RadioInput from '../component/RadioInput'
 import Button from '../component/button'
 import { addDoc, collection } from 'firebase/firestore'
 import { db } from '../../App'
+import { showMessage } from 'react-native-flash-message'
 
-const noteColorOptions = ['red', 'green', 'yellow']
+const noteColorOptions = ['red', 'green', 'grey', 'violet']
 
 
-export default function Create({ user }) {
+export default function Create({ user, navigation }) {
     const [title, setTile] = useState('')
     const [description, setDescription] = useState('')
     const [noteColor, setNoteColor] = useState('#526AF5')
+    const [loading, setLoading] = useState(false)
 
     const onpressCreate = async () => {
-        const docRef = await addDoc(collection(db, 'notes'), {
-            title: title,
-            description: description,
-            color: noteColor,
-            uid: user.uid,
-            email: user.email
-        })
-        console.log(docRef)
+        try {
+            setLoading(true)
+            await addDoc(collection(db, 'notes'), {
+                title: title,
+                description: description,
+                color: noteColor,
+                uid: user.uid,
+                email: user.email
+            })
+            setLoading(false)
+            navigation.navigate("Home")
+            showMessage({
+                message: "Great Job!",
+                type: "success",
+                description: "Note added successfully!",
+            });
+        }
+        catch (error) {
+            setLoading(true)
+            showMessage({
+                message: "Oops!",
+                type: "danger",
+                description: error.message,
+            });
+            setLoading(false)
+        }
     }
 
     return (
         <View style={styles.safeAreaView}>
-            <StatusBar backgroundColor="#F50057" barStyle="dark-content" />
+            <StatusBar backgroundColor="white" barStyle="dark-content" />
             <Text style={styles.createTitle} preset='h3'>Create Note</Text>
+            <Image style={styles.image} source={require('../image/car.png')} />
             <View style={styles.createNote}>
                 <Input
                     placeholder='Note Title'
                     onChangeText={(text) => { setTile(text) }}
+                    clearButtonMode='always'
                 />
                 <Input
                     placeholder='Description'
                     onChangeText={(text) => { setDescription(text) }}
-                    secureTextEntry
                     multiline={true}
+                    clearButtonMode="always"
                 />
                 <View style={{ marginBottom: 50 }}>
                     <Text preset='h4' style={{ fontWeight: 'bold', marginBottom: 20, marginTop: 34 }}>Select Note Color</Text>
@@ -56,10 +78,13 @@ export default function Create({ user }) {
                         })
                     }
                 </View>
-                <Button
-                    onPress={onpressCreate}
-                    title='Submit'
-                />
+                {
+                    loading ? <ActivityIndicator size='large'></ActivityIndicator> :
+                        <Button
+                            onPress={onpressCreate}
+                            title='Submit'
+                        />
+                }
             </View>
         </View>
     )
@@ -76,7 +101,7 @@ const styles = StyleSheet.create({
         paddingTop: 0
     },
     createTitle: {
-        paddingTop: 30,
+        paddingTop: 20,
     },
 
     accountToggleer: {
@@ -114,5 +139,12 @@ const styles = StyleSheet.create({
     selectedOuterCircle: {
         borderColor: 'orange',
     },
-
+    image: {
+        height: 200,
+        width: '100%',
+        margin: -9,
+        marginTop: 15,
+        zIndex: -1,
+        padding: 10
+    }
 })
